@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Chat with GPT</title>
+  <title>Vern GPT OpenAi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -34,12 +34,8 @@
       animation: glow 2s infinite alternate;
     }
     @keyframes glow {
-      from {
-        text-shadow: 0 0 5px #ff4ec4;
-      }
-      to {
-        text-shadow: 0 0 20px #ff4ec4, 0 0 30px #ff4ec4;
-      }
+      from { text-shadow: 0 0 5px #ff4ec4; }
+      to { text-shadow: 0 0 20px #ff4ec4, 0 0 30px #ff4ec4; }
     }
     textarea {
       width: 100%;
@@ -75,19 +71,17 @@
 <canvas id="particles"></canvas>
 
 <div class="container">
-  <h1>✨ PinkGPT Chat ✨</h1>
+  <h1>💬 Chat with Vern</h1>
   <textarea id="userInput" rows="4" placeholder="Type your message..."></textarea>
   <button onclick="sendMessage()">Send</button>
   <div id="response"></div>
 </div>
 
 <script>
-  const apiKey = "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";
-
   async function sendMessage() {
-    const userInput = document.getElementById("userInput").value;
+    const userInput = document.getElementById("userInput").value.trim();
     const responseDiv = document.getElementById("response");
-    if (!userInput.trim()) {
+    if (!userInput) {
       responseDiv.textContent = "Please enter a message.";
       return;
     }
@@ -95,26 +89,16 @@
     responseDiv.textContent = "Typing...";
 
     try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res = await fetch("https://rapido.zetsu.xyz/api/aria", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: userInput }]
-        })
+        body: JSON.stringify({ message: userInput })
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        responseDiv.textContent = "Error: " + (data.error?.message || "Unknown error.");
-        return;
-      }
-
-      const reply = data.choices[0].message.content;
+      const reply = data.response || "No response received.";
       responseDiv.textContent = "";
 
       let i = 0;
@@ -127,7 +111,7 @@
       }
       typeEffect();
     } catch (err) {
-      responseDiv.textContent = "Network error: " + err.message;
+      responseDiv.textContent = "Error: " + err.message;
     }
   }
 
