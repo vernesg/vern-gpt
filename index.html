@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat with GPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #ff4ec4;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 100px auto;
+      background: rgba(255, 78, 196, 0.1);
+      border: 1px solid #ff4ec4;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px #ff4ec4;
+    }
+    h1 {
+      text-align: center;
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 5px #ff4ec4;
+      }
+      to {
+        text-shadow: 0 0 20px #ff4ec4, 0 0 30px #ff4ec4;
+      }
+    }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      background: #111;
+      color: #ff4ec4;
+      border: 1px solid #ff4ec4;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #ff4ec4;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    #response {
+      white-space: pre-wrap;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="container">
+  <h1>✨ PinkGPT Chat ✨</h1>
+  <textarea id="userInput" rows="4" placeholder="Type your message..."></textarea>
+  <button onclick="sendMessage()">Send</button>
+  <div id="response"></div>
+</div>
+
+<script>
+  const apiKey = "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";
+
+  async function sendMessage() {
+    const userInput = document.getElementById("userInput").value;
+    const responseDiv = document.getElementById("response");
+    responseDiv.innerHTML = "Typing...";
+
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: userInput }]
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || "Error.";
+    responseDiv.innerHTML = "";
+
+    let i = 0;
+    function typeEffect() {
+      if (i < reply.length) {
+        responseDiv.innerHTML += reply.charAt(i);
+        i++;
+        setTimeout(typeEffect, 20);
+      }
+    }
+    typeEffect();
+  }
+
+  // Background Particles
+  const canvas = document.getElementById("particles");
+  const ctx = canvas.getContext("2d");
+  let width, height;
+  let particles = [];
+
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      dx: (Math.random() - 0.5) * 1,
+      dy: (Math.random() - 0.5) * 1,
+      radius: Math.random() * 2 + 1
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = "#ff4ec4";
+    for (let p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x < 0 || p.x > width) p.dx *= -1;
+      if (p.y < 0 || p.y > height) p.dy *= -1;
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
+
+</body>
+  </html>
+  
