@@ -49,6 +49,7 @@
       border: 1px solid #ff4ec4;
       border-radius: 10px;
       margin-bottom: 10px;
+      resize: vertical;
     }
     button {
       background: #ff4ec4;
@@ -86,36 +87,51 @@
   async function sendMessage() {
     const userInput = document.getElementById("userInput").value;
     const responseDiv = document.getElementById("response");
-    responseDiv.innerHTML = "Typing...";
-
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: userInput }]
-      })
-    });
-
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || "Error.";
-    responseDiv.innerHTML = "";
-
-    let i = 0;
-    function typeEffect() {
-      if (i < reply.length) {
-        responseDiv.innerHTML += reply.charAt(i);
-        i++;
-        setTimeout(typeEffect, 20);
-      }
+    if (!userInput.trim()) {
+      responseDiv.textContent = "Please enter a message.";
+      return;
     }
-    typeEffect();
+
+    responseDiv.textContent = "Typing...";
+
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: userInput }]
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        responseDiv.textContent = "Error: " + (data.error?.message || "Unknown error.");
+        return;
+      }
+
+      const reply = data.choices[0].message.content;
+      responseDiv.textContent = "";
+
+      let i = 0;
+      function typeEffect() {
+        if (i < reply.length) {
+          responseDiv.textContent += reply.charAt(i);
+          i++;
+          setTimeout(typeEffect, 20);
+        }
+      }
+      typeEffect();
+    } catch (err) {
+      responseDiv.textContent = "Network error: " + err.message;
+    }
   }
 
-  // Background Particles
+  // Particle background
   const canvas = document.getElementById("particles");
   const ctx = canvas.getContext("2d");
   let width, height;
@@ -132,8 +148,8 @@
     particles.push({
       x: Math.random() * width,
       y: Math.random() * height,
-      dx: (Math.random() - 0.5) * 1,
-      dy: (Math.random() - 0.5) * 1,
+      dx: (Math.random() - 0.5),
+      dy: (Math.random() - 0.5),
       radius: Math.random() * 2 + 1
     });
   }
@@ -156,5 +172,4 @@
 </script>
 
 </body>
-  </html>
-  
+</html>
