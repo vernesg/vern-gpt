@@ -1,0 +1,2 @@
+# vern-gpt
+openAi
